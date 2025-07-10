@@ -24,7 +24,7 @@ class MemberTest {
             }
         };
 
-        member = Member.create("toby@splearn.app", "Toby", "secret", passwordEncoder);
+        member = Member.create(new MemberCreateRequest("toby@splearn.app", "Toby", "secret"), passwordEncoder);
     }
 
     @Test
@@ -39,25 +39,25 @@ class MemberTest {
 
     @Test
     void activate() {
-        member.avtivate();
+        member.activate();
 
         assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
     }
 
     @Test
     void activateFail() {
-        member.avtivate();
+        member.activate();
 
         assertThatThrownBy(() -> {
-            member.avtivate();
+            member.activate();
         }).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void deactivate() {
-        member.avtivate();
+        member.activate();
 
-        member.deavtivate();
+        member.deactivate();
 
         assertThat(member.getStatus()).isEqualTo(MemberStatus.DEACTIVATED);
         
@@ -65,12 +65,12 @@ class MemberTest {
 
     @Test
     void deactivateFail() {
-        assertThatThrownBy(member::deavtivate).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(member::deactivate).isInstanceOf(IllegalStateException.class);
 
-        member.avtivate();
-        member.deavtivate();
+        member.activate();
+        member.deactivate();
 
-        assertThatThrownBy(member::deavtivate).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(member::deactivate).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -93,6 +93,18 @@ class MemberTest {
         member.changePassword("verysecret", passwordEncoder);
 
         assertThat(member.verifyPassword("verysecret", passwordEncoder)).isTrue();
-        
+    }
+
+    @Test
+    void isActive() {
+        assertThat(member.isActive()).isFalse();
+
+        member.activate();
+
+        assertThat(member.isActive()).isTrue();
+
+        member.deactivate();
+
+        assertThat(member.isActive()).isFalse();
     }
 }
